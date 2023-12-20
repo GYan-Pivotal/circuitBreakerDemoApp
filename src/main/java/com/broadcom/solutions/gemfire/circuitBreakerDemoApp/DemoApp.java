@@ -15,7 +15,7 @@ public class DemoApp
         CircuitBreaker.setContext(
                 SpringApplication.run(DemoApp.class, args));
         // primary cluster by default
-        CircuitBreaker.currentConnection = CircuitBreaker.currentConnection_primary_pool;
+        CircuitBreaker.currentConnection = CircuitBreaker.CURRENTCONNECTION_PRIMARY_POOL;
 
     }
 }

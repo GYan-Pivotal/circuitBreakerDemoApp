@@ -14,34 +14,25 @@ import java.util.concurrent.Executors;
 public class CircuitBreaker
 {
 
-    private final String primaryPoolName;
-    private final String secondaryPoolName;
     private final String primaryLocators;
     private final String secondaryLocators;
-    private final long sleepPeriodMs;
+
     private final ExecutorService executor;
     private static ConfigurableApplicationContext context=null;
 
-    public final static String currentConnection_primary_pool="PRIMARY";
-    public final static String currentConnection_secondary_pool="SECONDARYPOOL";
+    public final static String CURRENTCONNECTION_PRIMARY_POOL="PRIMARY";
+    public final static String CURRENTCONNECTION_SECONDARY_POOL="SECONDARYPOOL";
     public static String currentConnection = null;
 
     /**
      * Constructor
-     * @param primaryPool the primary connection pool
-     * @param backupPool the backyp secondary pool
      * @param primaryLocators the primary locator connection string
      * @param secondaryLocators the secondary locator connection string
-     * @param sleepPeriodMs the sleep period
      */
-    public CircuitBreaker(String primaryPool, String backupPool, String primaryLocators, String secondaryLocators,
-                          long sleepPeriodMs)
+    public CircuitBreaker(String primaryLocators, String secondaryLocators)
     {
         this.primaryLocators = primaryLocators;
         this.secondaryLocators = secondaryLocators;
-        this.primaryPoolName = primaryPool;
-        this.secondaryPoolName = backupPool;
-        this.sleepPeriodMs = sleepPeriodMs;
         this.executor = Executors.newCachedThreadPool();
     }//-------------------------------------------
 
@@ -63,15 +54,25 @@ public class CircuitBreaker
     throws Exception
     {
         System.out.println("current connection:"+CircuitBreaker.currentConnection);
-        if(CircuitBreaker.currentConnection.equals(currentConnection_primary_pool)){
+        if(CircuitBreaker.currentConnection.equals(CircuitBreaker.CURRENTCONNECTION_PRIMARY_POOL)){
             this.openToSecondary();
-        }else if (CircuitBreaker.currentConnection.equals(currentConnection_secondary_pool)){
+        }else if (CircuitBreaker.currentConnection.equals(CircuitBreaker.CURRENTCONNECTION_SECONDARY_POOL)){
             this.openPrimary();
         }else{
             System.out.println("OTHER clusters");
         }
 
     }//-------------------------------------------
+
+    public void SwitchToAnotherPool(String newPoolname){
+        if (newPoolname.equals(CircuitBreaker.CURRENTCONNECTION_PRIMARY_POOL)){
+            this.openPrimary();
+        }else if (newPoolname.equals(CircuitBreaker.CURRENTCONNECTION_SECONDARY_POOL)){
+            this.openToSecondary();
+        }else{
+            System.out.println("unrecognized clusters:"+newPoolname);
+        }
+    }
 
 //    public void openCircuit()
 //            throws Exception
@@ -102,7 +103,7 @@ public class CircuitBreaker
             String[] sourceArgs = {"--spring.data.gemfire.locators="+this.primaryLocators};
 
             CircuitBreaker.context = SpringApplication.run(DemoApp.class,sourceArgs );
-            CircuitBreaker.currentConnection = currentConnection_primary_pool;
+            CircuitBreaker.currentConnection = CircuitBreaker.CURRENTCONNECTION_PRIMARY_POOL;
 
         };
         this.executor.submit(openAndSwitchToPrimary);
@@ -127,7 +128,7 @@ public class CircuitBreaker
             String[] sourceArgs = {"--spring.data.gemfire.locators="+this.secondaryLocators};
 
             CircuitBreaker.context = SpringApplication.run(DemoApp.class,sourceArgs );
-            CircuitBreaker.currentConnection = currentConnection_secondary_pool;
+            CircuitBreaker.currentConnection = CircuitBreaker.CURRENTCONNECTION_SECONDARY_POOL;
 
         };
         this.executor.submit(openAndSwitchToSecondary);
@@ -143,7 +144,7 @@ public class CircuitBreaker
     public boolean isSecondaryUp()
             throws Exception
     {
-        return CircuitBreaker.currentConnection.equals(currentConnection_secondary_pool);
+        return CircuitBreaker.currentConnection.equals(CircuitBreaker.CURRENTCONNECTION_SECONDARY_POOL);
     }
 
     /**
@@ -155,7 +156,7 @@ public class CircuitBreaker
             throws Exception
     {
 
-        return CircuitBreaker.currentConnection.equals(currentConnection_primary_pool);
+        return CircuitBreaker.currentConnection.equals(CircuitBreaker.CURRENTCONNECTION_PRIMARY_POOL);
 
     }//-------------------------------------------
 }

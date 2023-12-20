@@ -90,29 +90,23 @@ public class AppConfig
     /**
      * Circuit break connection management object
      * @param cache the primary cache connection
-     * @param primaryPool the primary connection pool
-     * @param secondaryPool the second connection pool
      * @param primaryLocators the primary locators connection string
      * @param secondaryLocators the secondary locators connection string
-     * @param sleepPeriodMs the sleep delay period to switch back to primary once the circuit is open
      * @param locators the current locators connection string
      * @return the circuit breaker implementation object
      */
     @Bean
     public CircuitBreaker circuitBreaker(GemFireCache cache,
-                                         Pool primaryPool,
-                                         Pool secondaryPool,
                                          @Value("${primaryLocators}") String primaryLocators,
                                          @Value("${secondaryLocators}") String secondaryLocators,
-                                         @Value("${sleepPeriodMs:2000}") long sleepPeriodMs,
                                          @Value("${spring.data.gemfire.locators}")
                                                      String locators
     )
     {
         //Pool primaryPool, Pool backupPool, String secondaryLocators,
         //                          long sleepPeriodMs)
-        CircuitBreaker circuitBreaker = new CircuitBreaker(primaryPool.getName(),secondaryPool.getName(),
-                primaryLocators,secondaryLocators,sleepPeriodMs);
+        CircuitBreaker circuitBreaker = new CircuitBreaker(
+                primaryLocators,secondaryLocators);
 
 
         if(locators.equals(secondaryLocators))

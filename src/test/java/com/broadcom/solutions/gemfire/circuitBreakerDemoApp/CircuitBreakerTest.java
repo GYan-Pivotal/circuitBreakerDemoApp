@@ -70,10 +70,9 @@ public class CircuitBreakerTest {
 
     private CircuitBreaker createCircuitBreaker()
     {
-        return new CircuitBreaker("A","B",
+        return new CircuitBreaker(
                 primaryLocators,
-                secondaryLocators,
-                2000);
+                secondaryLocators);
     }
 
     /**

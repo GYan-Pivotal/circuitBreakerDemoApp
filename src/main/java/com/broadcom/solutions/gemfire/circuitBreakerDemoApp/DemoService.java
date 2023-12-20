@@ -50,4 +50,15 @@ public class DemoService
             throw e;
         }
     }//-------------------------------------------
+
+    @GetMapping("/pool/{poolName}")
+    public String SwitchToAnotherCluster(@PathVariable String poolName)throws Exception{
+        circuitBreaker.SwitchToAnotherPool(poolName);
+        return "Switched to: "+poolName;
+    }
+
+    @GetMapping("/pool/current")
+    public String SwitchToAnotherCluster()throws Exception{
+        return CircuitBreaker.currentConnection;
+    }
 }
