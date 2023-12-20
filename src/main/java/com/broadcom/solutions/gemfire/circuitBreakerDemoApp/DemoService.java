@@ -52,13 +52,13 @@ public class DemoService
     }//-------------------------------------------
 
     @GetMapping("/pool/{poolName}")
-    public String SwitchToAnotherCluster(@PathVariable String poolName)throws Exception{
+    public String SwitchToAnotherCluster(@PathVariable String poolName){
         circuitBreaker.SwitchToAnotherPool(poolName);
         return "Switched to: "+poolName;
     }
 
     @GetMapping("/pool/current")
-    public String SwitchToAnotherCluster()throws Exception{
+    public String GetCurrentCluster(){
         return CircuitBreaker.currentConnection;
     }
 }
